@@ -10,6 +10,8 @@
 
 	"expose_via_ngrok" : false,
 
+	"video_capture" : true,
+
 	"tokens" : {
 		"everyone": {
 			// no restrictions except only for localhost and local networks

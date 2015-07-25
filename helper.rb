@@ -19,3 +19,7 @@ def require_platform_capture
 	require "linux_capture" if linux?
 	require "windows_capture" if windows?
 end
+
+def base_url
+    @base_url ||= "#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}"
+  end

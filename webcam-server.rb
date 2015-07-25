@@ -1,5 +1,8 @@
+require 'fileutils'
 def cleanup 
 	Process.kill("HUP", @@ngrok_pid) unless @ngrok_pid.nil?
+	FileUtils.rm_r "segments"
+	system("killall ffmpeg")
 end
 at_exit { cleanup } 
 
@@ -8,6 +11,7 @@ require 'json'
 
 $: << "."
 require "helper"
+require "video.rb"
 
 
 @@html_code = File.read("webcam.html")
@@ -15,6 +19,8 @@ require "helper"
 @@config = {}
 @@tokens = {}
 @@ngrok_pid = nil
+
+@@segment_ctr = 0
 
 
 def reload_config
@@ -94,6 +100,7 @@ def setup_ngrok
 	end
 end
 
+
 # - SERVE METHODS
 reload_config
 
@@ -110,6 +117,14 @@ if ARGV.size > 0
 		puts list_webcams
 	end
 	exit
+end
+
+if video_streaming_enabled?
+	unless can_capture_video?
+		print_video_requirements
+		exit
+	end
+	start_video_capture
 end
 
 set :port, @@config['port']
@@ -148,6 +163,21 @@ get '/:token/image.jpg' do
 	res = File.read(filename).to_s
 	record_local(params[:token], res)
 	File.delete(filename)
+	res
+end
+
+# Video URLS
+get '/:token.m3u8' do
+	return status 404 unless video_streaming_enabled?
+	return status 503 unless video_available?
+	return status 403 unless token_valid?(params[:token], {ip: request.ip})
+	video_playlist(@@segment_ctr, params[:token], (params[:size] || PLAYLIST_LENGTH))
+end
+
+get '/:token/video_:segment.mpg' do
+	return status 404 unless video_streaming_enabled?
+	return status 403 unless token_valid?(params[:token], {ip: request.ip})
+	res = File.read(segment_filename(params[:segment])).to_s
 	res
 end
 

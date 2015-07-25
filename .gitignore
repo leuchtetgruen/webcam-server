@@ -1,2 +1,4 @@
 *.jpg
+*.mpg
 log/
+segments/
