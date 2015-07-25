@@ -8,6 +8,8 @@
 	"reload_token" : "secret", // you should seriously change that
 	"main_token": "everyone",
 
+	//"hostname" : "...",
+
 
 	"keep_minutes" : 30,
 
