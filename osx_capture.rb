@@ -1,6 +1,6 @@
 require 'mini_magick'
 def capture(width, height, device, filename)
-	cmd = "imagesnap -w 0.75 -d \"#{device}\" #{filename}"
+	cmd = "imagesnap -w 0.75 -d \"#{device}\" #{filename} > /dev/null 2>&1"	
 	puts cmd
 	pid = Process.spawn(cmd)
 	Process.wait(pid)

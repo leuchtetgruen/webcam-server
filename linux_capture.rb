@@ -1,6 +1,6 @@
 def capture(width, height, device, filename)
 	#TODO device
-	cmd = "fswebcam -F 3 -r #{width}x#{height} #{filename}"
+	cmd = "fswebcam -F 3 -r #{width}x#{height} #{filename} > /dev/null 2>&1"
 	puts cmd
 	pid = Process.spawn(cmd)
 	Process.wait(pid)
