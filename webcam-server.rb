@@ -171,7 +171,7 @@ get '/:token.m3u8' do
 	return status 404 unless video_streaming_enabled?
 	return status 503 unless video_available?
 	return status 403 unless token_valid?(params[:token], {ip: request.ip})
-	video_playlist(@@segment_ctr, params[:token], (params[:size] || PLAYLIST_LENGTH))
+	video_playlist(@@segment_ctr, params[:token], (params[:size].to_i || PLAYLIST_LENGTH))
 end
 
 get '/:token/video_:segment.mpg' do
