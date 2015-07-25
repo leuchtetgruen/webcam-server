@@ -21,6 +21,6 @@ def require_platform_capture
 end
 
 def base_url
-    hostname = @@config['hostname'] ? "#{@@config['hostname']:@@config['port']}" :request.env['HTTP_HOST']
+    hostname = @@config['hostname'] ? "#{@@config['hostname']}:#{@@config['port']}" :request.env['HTTP_HOST']
     @base_url ||= "#{request.env['rack.url_scheme']}://#{hostname}"
 end
