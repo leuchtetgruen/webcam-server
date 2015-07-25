@@ -75,6 +75,14 @@ def filename_for(token)
 	end
 end
 
+def record_local(token, res)
+	path = @@config['record_path']
+	unless path.nil?
+		filename = "#{path}/#{token}_#{Time.new.to_i}.jpg"
+		File.write(filename, res)
+	end
+end
+
 def main_url
 	p @@config
 	"/#{@@config['main_token']}.html"
@@ -138,6 +146,7 @@ get '/:token/image.jpg' do
 	h = params[:h] || height
 	capture(w, h, webcam_name, filename)
 	res = File.read(filename).to_s
+	record_local(params[:token], res)
 	File.delete(filename)
 	res
 end

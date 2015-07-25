@@ -1,11 +1,15 @@
 {
 	//"webcam_name" : "FaceTime HD Camera",
+	//"record_path": "/tmp", 
+	"port" : 4223,
 	"width" : 640,
 	"height": 480,
-	"reload_token" : "secret", 
+
+	"reload_token" : "secret", // you should seriously change that
 	"main_token": "everyone",
+
 	"expose_via_ngrok" : false,
-	"port" : 4223,
+
 	"tokens" : {
 		"everyone": {
 			// no restrictions except only for localhost and local networks
