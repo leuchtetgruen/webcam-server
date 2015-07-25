@@ -1,6 +1,9 @@
 def capture(width, height, device, filename)
 	#TODO device
 	cmd = "fswebcam -F 3 -r #{width}x#{height} #{filename}"
+	puts cmd
+	pid = Process.spawn(cmd)
+	Process.wait(pid)
 end
 
 def can_capture?
