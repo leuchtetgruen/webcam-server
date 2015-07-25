@@ -176,6 +176,10 @@ if @@mode == :video
 		video_playlist(@@segment_ctr, params[:token], params[:size].to_i)
 	end
 
+	get '/:token/next_minutes/:minutes.m3u8' do
+		redirect("/#{params[:token]}.m3u8?size=#{(params[:minutes].to_i * 60 / SECONDS_PER_SEGMENT)}")
+	end
+
 	get '/:token/video_:segment.mpg' do
 		return status 404 unless video_streaming_enabled?
 		return status 403 unless token_valid?(params[:token], {ip: request.ip})
