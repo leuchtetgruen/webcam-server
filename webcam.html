@@ -6,26 +6,22 @@
 <script type="text/javascript" charset="utf-8">
 
 var URL = "/<TOKEN>/image.jpg";
-var loading = false;
-window.setInterval(function() {
+var loadFunction = function() {
 			var canvas = document.getElementById('myImage');
 			var context = canvas.getContext('2d');
-			if (loading) {
-				context.fillStyle = "white";
-				context.fill();
-				return;
-			}
+
+			context.fillStyle = "white";
+			context.fill();
 
 			img = document.getElementById("webcamImage");
 			dlImg = new Image();
 			dlImg.onload = function() {
 				context.drawImage(this, 0,0);
-				loading = false;
+				window.setTimeout(loadFunction, 300);
 			};
 			dlImg.src = URL + "?" + new Date().getTime();
-			loading = true;
-
-		}, 1000);
+};
+window.setTimeout(loadFunction, 1000);
 
 
 </script>
