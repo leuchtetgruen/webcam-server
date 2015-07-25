@@ -12,15 +12,21 @@ def video_available?
 	@@segment_ctr > 1
 end
 
+def keep_segments
+	ret = (@@config['keep_minutes'].to_i * 60) / SECONDS_PER_SEGMENT
+	(ret == 0) ? KEEP_SEGMENTS : ret
+end
+
+
 def start_video_capture
 	FileUtils.rm_r "segments" if Dir.exist?("segments")
 	FileUtils.mkdir "segments"
 	Thread.new do
 		loop do
 			@@segment_ctr = @@segment_ctr + 1
-			if @@segment_ctr > KEEP_SEGMENTS
+			if @@segment_ctr > keep_segments
 				# cleanup
-				File.delete(segment_filename(@@segment_ctr - KEEP_SEGMENTS))
+				File.delete(segment_filename(@@segment_ctr - keep_segments))
 			end 
 
 			filename = segment_filename(@@segment_ctr)
@@ -55,6 +61,7 @@ def video_concatenate(from_segment, to_segment, outputfile)
 	pid = Process.spawn(cmd)
 	Process.wait(pid)
 	File.delete("playlist")
+
 	puts "Done"
 	true
 end

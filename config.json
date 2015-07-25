@@ -9,7 +9,7 @@
 	"main_token": "everyone",
 
 
-	"video_capture" : true,
+	"keep_minutes" : 30,
 
 	"tokens" : {
 		"everyone": {
