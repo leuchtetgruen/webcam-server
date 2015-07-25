@@ -8,7 +8,6 @@
 	"reload_token" : "secret", // you should seriously change that
 	"main_token": "everyone",
 
-	"expose_via_ngrok" : false,
 
 	"video_capture" : true,
 
