@@ -1,7 +1,13 @@
+def cleanup 
+	Process.kill("HUP", @@ngrok_pid) unless @ngrok_pid.nil?
+end
 at_exit { cleanup } 
 
 require 'sinatra'
 require 'json'
+
+$: << "."
+require "helper"
 
 
 @@html_code = File.read("webcam.html")
@@ -9,7 +15,6 @@ require 'json'
 @@config = {}
 @@tokens = {}
 @@ngrok_pid = nil
-
 
 
 def reload_config
@@ -49,29 +54,16 @@ def token_valid?(token, opts)
 	end
 end
 
-def start_if_necessary(token)
-	tk = @@tokens[token]
-	unless (tk[:running])
-		if (tk["command"])
-			cmd ="#{tk["command"]} " 
-		else
-			cmd = "#{@@config["webcam_command"]} &"
-		end
-		tk[:pid] = spawn(cmd)
-		Process.detach(tk[:pid])
-		tk[:running] = true
-	end
+def width
+	@@config['width'].nil? ? 640 : @@config['width'] 
 end
 
-def cleanup 
-	@@tokens.each do |key, t|
-		#PID+1 seems to be the right pid
-		Process.kill("HUP", t[:pid] + 1) unless t[:pid].nil?
+def height
+	@@config['height'].nil? ? 480 : @@config['height'] 
+end
 
-		File.delete(filename_for(key))
-
-		Process.kill("HUP", @@ngrok_pid) unless @ngrok_pid.nil?
-	end
+def webcam_name
+	@@config['webcam_name'] ? @@config['webcam_name'] : list_webcams.first
 end
 
 def filename_for(token)
@@ -96,9 +88,26 @@ end
 
 # - SERVE METHODS
 reload_config
+
+require_platform_capture
+unless can_capture?
+	print_requirements
+	exit
+end
+
+if ARGV.size > 0
+	arg = ARGV.first.downcase
+	if arg == "list"
+		puts "List of devices\n"
+		puts list_webcams
+	end
+	exit
+end
+
 set :port, @@config['port']
 set :bind, "0.0.0.0"
 setup_ngrok
+
 
 configure do
 	file = File.new("log/access.log", "a+")
@@ -119,15 +128,18 @@ end
 
 get '/:token.html' do
 	return status 403 unless token_valid?(params[:token], {ip: request.ip})
-	start_if_necessary(params[:token])
 	@@html_code.to_s.gsub("<TOKEN>", params[:token])
 end
 
 get '/:token/image.jpg' do
 	return status 403 unless token_valid?(params[:token], {ip: request.ip})
-	start_if_necessary(params[:token])
-	f = File.read(filename_for(params[:token]))
-	f.to_s
+	filename = filename_for(params[:token])
+	w = params[:w] || width
+	h = params[:h] || height
+	capture(w, h, webcam_name, filename)
+	res = File.read(filename).to_s
+	File.delete(filename)
+	res
 end
 
 
