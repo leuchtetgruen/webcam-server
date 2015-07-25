@@ -21,5 +21,5 @@ def require_platform_capture
 end
 
 def base_url
-    @base_url ||= "#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}"
-  end
+    @base_url ||= "#{request.env['rack.url_scheme']}://#{request.host}"
+end
