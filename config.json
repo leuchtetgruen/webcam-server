@@ -1,0 +1,23 @@
+{
+	"webcam_command" : "./osx_webcam.sh image.jpg",
+	"reload_token" : "secret", // TODO: Change this, seriously!
+	"main_token": "everyone",
+	"tokens" : {
+		"everyone": {
+			// no restrictions - everybody will be able to watch this
+		},
+
+		"restricted" : {
+			// restricted to one ip, for one hour with a seperate capture task
+			"ip_lock" : true,
+			"valid_for" : 3600,
+			"filename" : "image_secret.jpg",
+			"command" : "./osx_webcam.sh image_secret.jpg"
+		},
+
+		"once" : {
+			// this image will only be able to be loaded once
+			"max_loads": 1
+		}
+	}
+}
