@@ -97,6 +97,7 @@ end
 # - SERVE METHODS
 reload_config
 set :port, @@config['port']
+set :bind, "0.0.0.0"
 setup_ngrok
 
 configure do
