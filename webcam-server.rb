@@ -2,12 +2,14 @@ at_exit { cleanup }
 
 require 'sinatra'
 require 'json'
+require 'ngrok/tunnel'
 
 
 @@html_code = File.read("webcam.html")
 
 @@config = {}
 @@tokens = {}
+@@ngrok_pid = nil
 
 
 
@@ -68,6 +70,8 @@ def cleanup
 		Process.kill("HUP", t[:pid] + 1) unless t[:pid].nil?
 
 		File.delete(filename_for(key))
+
+		Process.kill("HUP", @@ngrok_pid) unless @ngrok_pid.nil?
 	end
 end
 
@@ -85,9 +89,22 @@ def main_url
 	"/#{@@config['main_token']}.html"
 end
 
+def setup_ngrok
+	if @@config['expose_via_ngrok']
+		@@ngrok_pid = spawn("ngrok #{@@config['port']}")
+	end
+end
+
 # - SERVE METHODS
 reload_config
+set :port, @@config['port']
+setup_ngrok
 
+configure do
+	file = File.new("log/access.log", "a+")
+	file.sync = true
+	use Rack::CommonLogger, file
+end
 
 
 get '/' do
