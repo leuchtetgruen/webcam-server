@@ -2,7 +2,6 @@ at_exit { cleanup }
 
 require 'sinatra'
 require 'json'
-require 'ngrok/tunnel'
 
 
 @@html_code = File.read("webcam.html")
