@@ -4,7 +4,13 @@
 	"main_token": "everyone",
 	"tokens" : {
 		"everyone": {
-			// no restrictions - everybody will be able to watch this
+			// no restrictions except only for localhost and local networks
+			"ips" : [
+				"::1",
+				"127.0.0.1",
+				"192.168.*",
+				"10.*"
+			]
 		},
 
 		"restricted" : {

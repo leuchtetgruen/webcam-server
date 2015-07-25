@@ -29,6 +29,10 @@ def token_valid?(token, opts)
 		ret_val = false if tk[:valid_until] and tk[:valid_until] < Time.now.to_i
 		ret_val = false if tk["max_loads"] and ( tk[:loads] || 1 ) > tk["max_loads"].to_i
 
+		if tk["ips"] then
+			ret_val = tk["ips"].any? { |ip| opts[:ip].match(ip) }
+		end
+
 		if ret_val then
 			tk[:ip] = opts[:ip]
 			if tk["valid_for"] and !tk[:valid_until]
@@ -92,7 +96,7 @@ end
 
 get '/reload/:reload_token' do
 	return status 403 unless reload_config_token_is_ok?(params[:reload_token])
-	reload_tokens
+	reload_config
 	redirect(main_url)
 end
 
