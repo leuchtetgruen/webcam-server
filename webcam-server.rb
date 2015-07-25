@@ -90,7 +90,7 @@ end
 
 def setup_ngrok
 	if @@config['expose_via_ngrok']
-		@@ngrok_pid = spawn("ngrok #{@@config['port']}")
+		@@ngrok_pid = spawn("ngrok http #{@@config['port']}")
 	end
 end
 

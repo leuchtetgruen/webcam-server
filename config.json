@@ -2,7 +2,7 @@
 	"webcam_command" : "./osx_webcam.sh image.jpg",
 	"reload_token" : "secret", // TODO: Change this, seriously!
 	"main_token": "everyone",
-	"expose_via_ngrok" : false,
+	"expose_via_ngrok" : true,
 	"port" : 4223,
 	"tokens" : {
 		"everyone": {
