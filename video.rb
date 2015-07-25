@@ -40,10 +40,15 @@ def segment_filename(segment_id)
 	"segments/video_#{segment_id}.mpg"
 end
 
-def video_playlist(from_segment, token, entries=0)
+
+def live_playlist(token, entries)
 	entries = PLAYLIST_LENGTH if entries == 0
+	video_playlist(@@segment_ctr - 1, @@segment_ctr + entries, token)
+end
+
+def video_playlist(from_segment, to_segment, token)
 	s = "#EXTM3U\r\n"
-	(from_segment-1..from_segment+entries).each do |i|
+	(from_segment..to_segment).each do |i|
 		s = s + "#EXTINF:#{SECONDS_PER_SEGMENT}, Video\r\n"
 		s = s + "#{base_url}/#{token}/video_#{i}.mpg\r\n"
 	end

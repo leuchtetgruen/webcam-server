@@ -173,7 +173,7 @@ if @@mode == :video
 		return status 404 unless video_streaming_enabled?
 		return status 503 unless video_available?
 		return status 403 unless token_valid?(params[:token], {ip: request.ip})
-		video_playlist(@@segment_ctr, params[:token], params[:size].to_i)
+		live_playlist(params[:token], params[:size].to_i)
 	end
 
 	get '/:token/next_minutes/:minutes.m3u8' do
@@ -185,6 +185,14 @@ if @@mode == :video
 		return status 403 unless token_valid?(params[:token], {ip: request.ip})
 		res = File.read(segment_filename(params[:segment])).to_s
 		res
+	end
+
+	get '/:token/:sfrom/:sto/playlist.m3u8' do
+		return status 404 unless video_streaming_enabled?
+		return status 403 unless token_valid?(params[:token], {ip: request.ip})
+		from = params[:sfrom].to_i
+		to = params[:sto].to_i
+		video_playlist(from, to, params[:token])
 	end
 
 	get '/:token/:sfrom/:sto/video.mpg' do
@@ -202,6 +210,16 @@ if @@mode == :video
 		res
 	end
 
+	get '/:token/last_seconds/:seconds.m3u8' do
+		return status 404 unless video_streaming_enabled?
+		return status 403 unless token_valid?(params[:token], {ip: request.ip})
+		seconds = params[:seconds].to_i
+		n_segments = (seconds.to_f / SECONDS_PER_SEGMENT.to_f).to_i
+		from = @@segment_ctr - n_segments
+		to = @@segment_ctr - 1
+		redirect("/#{params[:token]}/#{from}/#{to}/playlist.m3u8")
+	end
+
 	get '/:token/last_seconds/:seconds.mpg' do
 		return status 404 unless video_streaming_enabled?
 		return status 403 unless token_valid?(params[:token], {ip: request.ip})
@@ -210,6 +228,10 @@ if @@mode == :video
 		from = @@segment_ctr - n_segments
 		to = @@segment_ctr - 1
 		redirect("/#{params[:token]}/#{from}/#{to}/video.mpg")
+	end
+
+	get '/:token/last_minutes/:minutes.m3u8' do
+		redirect("/#{params[:token]}/last_seconds/#{params[:minutes].to_i*60}.m3u8")
 	end
 
 	get '/:token/last_minutes/:minutes.mpg' do
