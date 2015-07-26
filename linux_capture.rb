@@ -30,5 +30,5 @@ def can_capture_video?
 end
 
 def print_video_requirements
-	puts "Please install fmpeg via homebrew. Take care that the qtkit codec is also installed"
+	puts "Please install fmpeg. Take care that the v4l2 codec is also installed"
 end
