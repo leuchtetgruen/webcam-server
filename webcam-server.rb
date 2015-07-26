@@ -26,6 +26,9 @@ require "video.rb"
 def reload_config
 	@@config = JSON.parse(File.read("config.json"))
 	@@tokens = @@config["tokens"]
+	if (@@config['mode'])
+		@@mode = @@config['mode'].to_sym
+	end
 end
 
 def reload_config_token_is_ok?(token)

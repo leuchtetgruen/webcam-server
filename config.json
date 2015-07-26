@@ -1,6 +1,9 @@
 {
 	//"webcam_name" : "FaceTime HD Camera",
 	//"record_path": "/tmp", 
+
+	"mode": "picture",
+
 	"port" : 4223,
 	"width" : 640,
 	"height": 480,
