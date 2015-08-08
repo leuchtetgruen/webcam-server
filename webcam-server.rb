@@ -200,6 +200,8 @@ if @@mode == :picture
 		res = File.read(filename).to_s
 		record_local(params[:token], res)
 		File.delete(filename)
+
+		content_type "image/jpeg"
 		res
 	end
 end
