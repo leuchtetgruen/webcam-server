@@ -1,11 +1,12 @@
 require 'fileutils'
 def cleanup 
-	FileUtils.rm_r "segments"
+	FileUtils.rm_r "segments" if File.directory?("segments")
 	system("killall ffmpeg")
 end
 at_exit { cleanup } 
 
 require 'sinatra'
+require 'sinatra/cookies'
 require 'json'
 
 $: << "."
@@ -17,6 +18,7 @@ require "video.rb"
 
 @@config = {}
 @@tokens = {}
+@@viewers = {}
 
 @@segment_ctr = 0
 
@@ -31,8 +33,8 @@ def reload_config
 	end
 end
 
-def reload_config_token_is_ok?(token)
-	@@config["reload_token"] == token
+def secret_config_token_is_ok?(token)
+	@@config["secret_token"] == token
 end
 
 def token_valid?(token, opts)
@@ -62,6 +64,7 @@ def token_valid?(token, opts)
 		false
 	end
 end
+
 
 def width
 	@@config['width'].nil? ? 640 : @@config['width'] 
@@ -145,10 +148,33 @@ get '/' do
 	redirect(main_url)
 end
 
-get '/reload/:reload_token' do
-	return status 403 unless reload_config_token_is_ok?(params[:reload_token])
+get '/reload/:secret_token' do
+	return status 403 unless secret_config_token_is_ok?(params[:secret_token])
 	reload_config
 	redirect(main_url)
+end
+
+# management
+get '/access/create/restricted/:secret_token' do
+	return status 403 unless secret_config_token_is_ok?(params[:secret_token])
+	random = (0...10).map { (65 + rand(26)).chr }.join
+	@@tokens[random] = {
+		"ip_lock" => true
+	}
+	random
+end
+
+get '/access/remove/:token/:secret_token' do
+	return status 403 unless secret_config_token_is_ok?(params[:secret_token])
+	@@tokens[:token] = nil
+end
+
+get '/stats/:secret_token' do
+	return status 403 unless secret_config_token_is_ok?(params[:secret_token])
+	{
+		tokens: @@tokens.keys,
+		viewers: @@viewers
+	}.to_json
 end
 
 if @@mode == :picture 
@@ -159,6 +185,14 @@ if @@mode == :picture
 
 	get '/:token/image.jpg' do
 		return status 403 unless token_valid?(params[:token], {ip: request.ip})
+
+		viewer_id = cookies[:id].nil? ? (0...10).map { (65 + rand(26)).chr }.join : cookies[:id]
+		cookies[:id] = viewer_id
+		@@viewers[viewer_id] = {
+			token: params[:token],
+			last_seen: Time.new.to_i
+		}
+
 		filename = filename_for(params[:token])
 		w = params[:w] || width
 		h = params[:h] || height
@@ -186,6 +220,14 @@ if @@mode == :video
 	get '/:token/video_:segment.mpg' do
 		return status 404 unless video_streaming_enabled?
 		return status 403 unless token_valid?(params[:token], {ip: request.ip})
+
+		viewer_id = cookies[:id].nil? ? (0...10).map { (65 + rand(26)).chr }.join : cookies[:id]
+		cookies[:id] = viewer_id
+		@@viewers[viewer_id] = {
+			token: params[:token],
+			last_seen: Time.new.to_i
+		}
+
 		res = File.read(segment_filename(params[:segment])).to_s
 		res
 	end
